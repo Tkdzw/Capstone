@@ -83,6 +83,14 @@ public class MasterNode {
                 frameCount++;
             }
 
+            // After processing all frames, send termination signal to all workers
+            for (Socket workerSocket : workerSockets) {
+                DataOutputStream out = new DataOutputStream(workerSocket.getOutputStream());
+                out.writeInt(-1); // Send termination signal
+                out.flush();
+                System.out.println("Sent termination signal to worker: " + workerSocket.getInetAddress());
+            }
+
             // Release resources
             videoCapture.release();
             videoWriter.release();

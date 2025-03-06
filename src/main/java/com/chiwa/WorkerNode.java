@@ -27,6 +27,13 @@ public class WorkerNode {
             while (true) {
                 // Read the size of the frame
                 int frameSize = in.readInt();
+
+                // Check for termination signal
+                if (frameSize == -1) {
+                    System.out.println("Worker: Received termination signal. Exiting...");
+                    break;
+                }
+
                 byte[] imageData = new byte[frameSize];
 
                 // Read the frame data
@@ -62,6 +69,8 @@ public class WorkerNode {
         } catch (IOException e) {
             System.err.println("Worker: IOException occurred");
             e.printStackTrace();
+        } finally {
+            System.out.println("Worker: Disconnected");
         }
     }
 
