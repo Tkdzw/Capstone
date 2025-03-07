@@ -36,3 +36,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+*.mp4
+*.mp3
+*.mp4
+processed_videos/output_video.mp4
