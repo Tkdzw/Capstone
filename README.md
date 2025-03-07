@@ -92,7 +92,7 @@ It splits a video into frames, distributes them across multiple worker nodes (**
 
 ---
 
-## 🔍 Example Processing
+### 🔍 Example Processing
 
 - Convert video frames to grayscale
 - Apply edge detection
