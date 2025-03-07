@@ -19,7 +19,7 @@ It splits a video into frames, distributes them across multiple worker nodes (**
 
 ---
 ## 🏗️ Project Structure
-
+```
 📂 Capstone-Project
 ┣ 📂 src/com/chiwa
 ┃ ┣ 📜 MasterNode.java       # Manages worker nodes & distributes frames
@@ -30,7 +30,7 @@ It splits a video into frames, distributes them across multiple worker nodes (**
 ┣ 📂 processed_frames        # Stores processed frames
 ┣ 📜 README.md               # Project documentation
 ┗ 📜 .gitignore              # Git ignore file
-
+```
 ---
 
 ## 🔧 Setup & Installation
@@ -60,45 +60,60 @@ It splits a video into frames, distributes them across multiple worker nodes (**
 ## 🏃‍♂️ How to Run
 
 ### **1️⃣ Start the Master Node**
-```sh
-java com.chiwa.MasterNode
-Splits the video into frames.
-Distributes frames to workers.
-2️⃣ Start Worker Nodes (on separate machines or locally)
-sh
-Copy
-Edit
-java com.chiwa.WorkerNode
-Connects to Master.
-Receives frames, processes them, and sends them back.
-📜 Workflow
+
+- java com.chiwa.MasterNode
+- Splits the video into frames.
+- Distributes frames to workers.
+
+### **2️⃣ Start Worker Nodes (on separate machines or locally)**
+
+- java com.chiwa.WorkerNode.
+- Connects to Master.
+- Receives frames, processes them, and sends them back.
+
+---
+
+## 📜 Workflow
+
 1️⃣ Master Node
 
-Reads video, extracts frames.
-Distributes frames to multiple Worker Nodes.
+- Reads video, extracts frames.
+- Distributes frames to multiple Worker Nodes.
+
 2️⃣ Worker Nodes
 
-Receives frames, processes (e.g., grayscale, edge detection).
-Sends back processed frames.
+- Receives frames, processes (e.g., grayscale, edge detection).
+- Sends back processed frames.
+
 3️⃣ Master Node
 
-Collects processed frames.
-Merges them back into a video.
-🔍 Example Processing
-Convert video frames to grayscale
-Apply edge detection
-Resize or enhance frames
-🛠️ Future Improvements
-GPU Acceleration (CUDA, OpenCL)
-Dynamic Load Balancing (Intelligent frame distribution)
-Cloud Deployment (AWS, GCP, or Azure)
-🤝 Contributors
-[Your Name] - Master & Worker Node Implementation
-Team Members - Additional contributions
-📄 License
+- Collects processed frames.
+- Merges them back into a video.
+
+---
+
+## 🔍 Example Processing
+
+- Convert video frames to grayscale
+- Apply edge detection
+- Resize or enhance frames
+
+
+### 🛠️ Future Improvements
+
+- GPU Acceleration (CUDA, OpenCL)
+- Dynamic Load Balancing (Intelligent frame distribution)
+- Cloud Deployment (AWS, GCP, or Azure)
+
+
+### 🤝 Contributors
+- Asher T Chiwashira - Master & Worker Node Implementation
+- Team Members - Additional contributions
+
+## 📄 License
 This project is licensed under the MIT License.
 
-🎯 Happy Coding! 🚀
+## 🎯 Happy Coding! 🚀
 
 
 This `README.md` covers:  
