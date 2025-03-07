@@ -100,7 +100,7 @@ public class MasterNode {
                 workerIndex = (workerIndex + 1) % NUM_WORKERS;
 
                 // Send the frame to the worker
-                sendFrame(workerSocket, frame);
+                sendFrame(workerSocket, frame, frameCount);
 
                 // Receive the processed frame from the worker
                 Mat processedFrame = receiveProcessedFrame(workerSocket);
@@ -132,7 +132,7 @@ public class MasterNode {
         }
     }
 
-    private static void sendFrame(Socket socket, Mat frame) throws IOException {
+    private static void sendFrame(Socket socket, Mat frame, int frameNumber) throws IOException {
         // Convert the frame to a byte array
         MatOfByte buffer = new MatOfByte();
         Imgcodecs.imencode(".jpg", frame, buffer);
@@ -141,6 +141,7 @@ public class MasterNode {
         // Send the size of the frame first
         DataOutputStream out = new DataOutputStream(socket.getOutputStream());
         out.writeInt(imageData.length);
+        out.writeInt(frameNumber);
         out.write(imageData);
         out.flush();
         System.out.println("Sent frame to worker");

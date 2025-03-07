@@ -33,6 +33,7 @@ public class WorkerNode {
             while (true) {
                 // Read the size of the frame
                 int frameSize = in.readInt();
+                int frameNumber = in.readInt();
 
                 // Check for termination signal
                 if (frameSize == -1) {
@@ -43,7 +44,7 @@ public class WorkerNode {
                 // Read the frame data
                 byte[] imageData = new byte[frameSize];
                 in.readFully(imageData);
-                System.out.println("Worker: Received frame from Master");
+                System.out.println("Worker: Received frame" + frameNumber + " from Master");
 
                 // Submit the frame for parallel processing
                 executorService.submit(() -> {
