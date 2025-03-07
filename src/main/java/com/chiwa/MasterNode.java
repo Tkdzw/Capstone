@@ -11,53 +11,47 @@ import org.opencv.imgcodecs.Imgcodecs;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MasterNode {
     private static final int PORT = 5000;
     private static final String VIDEO_PATH = "videos/input_video.mp4"; // Path to the input video
     private static final String OUTPUT_VIDEO_PATH = "processed_videos/output_video.mp4"; // Path to save the processed video
+    private static final String AUDIO_PATH = "audio.mp3"; // Path to save the extracted audio
+    private static final String FINAL_OUTPUT_PATH = "processed_videos/output_video_with_audio.mp4"; // Path to save the final video with audio
     private static final int NUM_WORKERS = 3; // Number of worker nodes to wait for
-
-    // Class to store processed frames with their index
-    private static class ProcessedFrame implements Comparable<ProcessedFrame> {
-        private final int index;
-        private final Mat frame;
-
-        public ProcessedFrame(int index, Mat frame) {
-            this.index = index;
-            this.frame = frame;
-        }
-
-        public int getIndex() {
-            return index;
-        }
-
-        public Mat getFrame() {
-            return frame;
-        }
-
-        @Override
-        public int compareTo(ProcessedFrame other) {
-            return Integer.compare(this.index, other.index);
-        }
-    }
 
     public static void main(String[] args) {
         // Load OpenCV native library
         System.loadLibrary(org.opencv.core.Core.NATIVE_LIBRARY_NAME);
 
         try {
-            // Process video frames
+            System.out.println("Starting MasterNode...");
+
+            // Step 1: Extract audio from the original video
+            System.out.println("Extracting audio...");
+            extractAudio(VIDEO_PATH, AUDIO_PATH);
+            System.out.println("Audio extracted to: " + AUDIO_PATH);
+
+            // Step 2: Process video frames
+            System.out.println("Processing video frames...");
             processVideoFrames();
-        } catch (IOException | InterruptedException e) {
-            System.err.println("Error: Exception occurred");
+
+            // Step 3: Reattach audio to the processed video
+            System.out.println("Reattaching audio...");
+            attachAudio(OUTPUT_VIDEO_PATH, AUDIO_PATH, FINAL_OUTPUT_PATH);
+            System.out.println("Audio reattached to: " + FINAL_OUTPUT_PATH);
+
+            System.out.println("MasterNode completed successfully.");
+
+        } catch (IOException e) {
+            System.err.println("Error: IOException occurred");
             e.printStackTrace();
         }
     }
 
-    private static void processVideoFrames() throws IOException, InterruptedException {
+    private static void processVideoFrames() throws IOException {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.out.println("Master Node: Waiting for " + NUM_WORKERS + " workers to connect...");
 
@@ -94,18 +88,12 @@ public class MasterNode {
                 return;
             }
 
-            // Create a thread pool for parallel processing
-            ExecutorService executorService = Executors.newFixedThreadPool(NUM_WORKERS);
-
-            // Priority queue to store processed frames in order
-            PriorityQueue<ProcessedFrame> frameQueue = new PriorityQueue<>();
-
             Mat frame = new Mat();
             int frameCount = 0;
             int workerIndex = 0;
 
             while (videoCapture.read(frame)) {
-                System.out.println("Sending frame: " + frameCount);
+                System.out.println("Processing frame: " + frameCount);
 
                 // Select the next worker in a round-robin fashion
                 Socket workerSocket = workerSockets.get(workerIndex);
@@ -114,37 +102,13 @@ public class MasterNode {
                 // Send the frame to the worker
                 sendFrame(workerSocket, frame, frameCount);
 
-                        // Receive the processed frame from the worker
-                        Mat processedFrame = receiveProcessedFrame(workerSocket);
+                // Receive the processed frame from the worker
+                Mat processedFrame = receiveProcessedFrame(workerSocket);
 
-                        // Add the processed frame to the priority queue
-                        synchronized (frameQueue) {
-                            frameQueue.add(new ProcessedFrame(currentFrameIndex, processedFrame));
-                        }
-                    } catch (IOException e) {
-                        System.err.println("Error: IOException occurred while processing frame " + currentFrameIndex);
-                        e.printStackTrace();
-                    }
-                });
+                // Write the processed frame to the output video
+                videoWriter.write(processedFrame);
 
                 frameCount++;
-            }
-
-            // Shutdown the thread pool
-            executorService.shutdown();
-            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-
-            // Write frames to the output video in order
-            int nextFrameIndex = 0;
-            while (!frameQueue.isEmpty()) {
-                ProcessedFrame processedFrame = frameQueue.poll();
-                if (processedFrame.getIndex() == nextFrameIndex) {
-                    videoWriter.write(processedFrame.getFrame());
-                    nextFrameIndex++;
-                } else {
-                    // Re-insert the frame into the queue if it's not the next frame
-                    frameQueue.add(processedFrame);
-                }
             }
 
             // Release resources
@@ -195,5 +159,33 @@ public class MasterNode {
 
         // Convert the byte array back to a Mat
         return Imgcodecs.imdecode(new MatOfByte(processedImageData), Imgcodecs.IMREAD_COLOR);
+    }
+
+    private static void extractAudio(String inputVideoPath, String outputAudioPath) throws IOException {
+        System.out.println("Debug: Extracting audio from " + inputVideoPath + " to " + outputAudioPath);
+        ProcessBuilder processBuilder = new ProcessBuilder(
+                "ffmpeg", "-i", inputVideoPath, "-q:a", "0", "-map", "a", outputAudioPath
+        );
+        Process process = processBuilder.start();
+        try {
+            process.waitFor();
+        } catch (InterruptedException e) {
+            System.err.println("Error: InterruptedException occurred in extractAudio");
+            e.printStackTrace();
+        }
+    }
+
+    private static void attachAudio(String inputVideoPath, String inputAudioPath, String outputVideoPath) throws IOException {
+        System.out.println("Debug: Attaching audio from " + inputAudioPath + " to " + inputVideoPath);
+        ProcessBuilder processBuilder = new ProcessBuilder(
+                "ffmpeg", "-i", inputVideoPath, "-i", inputAudioPath, "-c:v", "copy", "-c:a", "aac", "-strict", "experimental", outputVideoPath
+        );
+        Process process = processBuilder.start();
+        try {
+            process.waitFor();
+        } catch (InterruptedException e) {
+            System.err.println("Error: InterruptedException occurred in attachAudio");
+            e.printStackTrace();
+        }
     }
 }
