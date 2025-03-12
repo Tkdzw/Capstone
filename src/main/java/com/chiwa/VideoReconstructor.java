@@ -11,7 +11,9 @@ import java.util.Arrays;
 import static org.opencv.videoio.VideoWriter.fourcc;
 
 public class VideoReconstructor {
-    static { System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
+    static {
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+    }
 
     public static void main(String[] args) {
         String processedFramesFolder = "processed_frames/";
@@ -28,7 +30,7 @@ public class VideoReconstructor {
         Arrays.sort(frameFiles); // Ensure correct order
 
         Mat firstFrame = Imgcodecs.imread(frameFiles[0].getAbsolutePath());
-        VideoWriter videoWriter = new VideoWriter(outputVideoPath, fourcc('M','J','P','G'), fps, firstFrame.size());
+        VideoWriter videoWriter = new VideoWriter(outputVideoPath, fourcc('M', 'J', 'P', 'G'), fps, firstFrame.size());
 
         for (File frameFile : frameFiles) {
             Mat frame = Imgcodecs.imread(frameFile.getAbsolutePath());

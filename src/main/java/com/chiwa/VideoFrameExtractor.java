@@ -5,7 +5,9 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.videoio.VideoCapture;
 
 public class VideoFrameExtractor {
-    static { System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
+    static {
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+    }
 
     public static void extractFrames(String videoPath, String outputFolder) {
         VideoCapture cap = new VideoCapture(videoPath);

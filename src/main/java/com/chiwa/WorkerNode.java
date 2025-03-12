@@ -30,7 +30,8 @@ public class WorkerNode {
                 int frameNumber = in.readInt();
 
                 // Check for termination signal
-                if (frameSize == -1) {
+                // Check for termination signal
+                if (frameSize == -1 || frameNumber == -1) { // Ensure termination is detected
                     System.out.println("Worker: Received termination signal. Exiting...");
                     break;
                 }
@@ -77,12 +78,12 @@ public class WorkerNode {
     private static Mat processFrame(Mat frame) {
         // Convert to grayscale
         Mat grayscaleFrame = new Mat();
-        Imgproc.cvtColor(frame, grayscaleFrame, Imgproc.COLOR_BGR2GRAY);
+        Imgproc.cvtColor(frame, grayscaleFrame, Imgproc.COLOR_RGB2GRAY);
 
         // Apply edge detection (optional)
-        Mat edges = new Mat();
-        Imgproc.Canny(grayscaleFrame, edges, 100, 200);
+//        Mat edges = new Mat();
+//        Imgproc.Canny(grayscaleFrame, edges, 100, 200);
 
-        return edges; // Return the processed frame
+        return grayscaleFrame; // Return the processed frame
     }
 }

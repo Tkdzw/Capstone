@@ -29,6 +29,13 @@ public class MasterNode {
         try {
             System.out.println("Starting MasterNode...");
 
+            File file = new File("audio.mp3"); // Specify the file path
+            if (file.delete()) {
+                System.out.println("File deleted successfully.");
+            } else {
+                System.out.println("Failed to delete the file or file does not exist.");
+            }
+
             // Step 1: Extract audio from the original video
             System.out.println("Extracting audio...");
             extractAudio(VIDEO_PATH, AUDIO_PATH);
@@ -120,7 +127,8 @@ public class MasterNode {
             // Send termination signal to all workers
             for (Socket workerSocket : workerSockets) {
                 DataOutputStream out = new DataOutputStream(workerSocket.getOutputStream());
-                out.writeInt(-1); // Send termination signal
+                out.writeInt(-1); // Termination signal for frame size
+                out.writeInt(-1);// Send termination signal
                 out.flush();
                 System.out.println("Sent termination signal to worker: " + workerSocket.getInetAddress());
                 workerSocket.close();
@@ -181,11 +189,14 @@ public class MasterNode {
                 "ffmpeg", "-i", inputVideoPath, "-i", inputAudioPath, "-c:v", "copy", "-c:a", "aac", "-strict", "experimental", outputVideoPath
         );
         Process process = processBuilder.start();
+
         try {
             process.waitFor();
         } catch (InterruptedException e) {
             System.err.println("Error: InterruptedException occurred in attachAudio");
             e.printStackTrace();
         }
+
+
     }
 }
